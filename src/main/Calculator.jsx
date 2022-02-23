@@ -5,7 +5,17 @@ import Display from "../components/Display/Display";
 //styles
 import { Container, Title } from "./calculator-style";
 
+const estadoIncial = {
+  valorDoDisplay: "0",
+  limparDisplay: false,
+  operacao: null,
+  valores: [0, 0],
+  valorAtual: 0,
+};
+
 class Calculator extends React.Component {
+  state = { ...estadoIncial };
+
   constructor(props) {
     super(props);
 
@@ -14,15 +24,57 @@ class Calculator extends React.Component {
     this.addDigit = this.addDigit.bind(this);
   }
   clearMemory() {
+    // quando clicar
+    this.setState({ ...estadoIncial });
     console.log("limpar");
   }
 
   setOperation(operation) {
+    if (this.state.valorAtual === 0) {
+      this.setState({ operation, valorAtual: 1, limparDisplay: true });
+    } else {
+      const result = operation === "=";
+      const operacaoAtual = this.state.operacao;
+      const valores = [...this.state.valores];
+
+      try {
+        valores[0] = eval(`${valores[0]} ${operacaoAtual} ${valores[1]}`);
+      } catch (error) {
+        valores[0] = this.state.valores[0];
+      }
+      
+      valores[1] = 0;
+      this.setState({
+        valorDoDisplay: valores[0],
+        operacao: result ? null : operation,
+        valorAtual: result ? 0 : 1,
+        limparDisplay: !result,
+        valores,
+      });
+    }
     console.log(operation);
   }
 
   addDigit(digit) {
-    console.log(digit);
+    if (digit === "." && this.state.valorDoDisplay.includes(".")) {
+      return;
+    }
+
+    const limparDisplay =
+      this.state.valorDoDisplay === "0" || this.state.limparDisplay;
+    const valorCorrente = limparDisplay ? "" : this.state.valorDoDisplay;
+    const valorDoDisplay = valorCorrente + digit;
+    this.setState({ valorDoDisplay, limparDisplay: false });
+
+    if (digit !== ".") {
+      const i = this.state.valorAtual;
+      const novoValor = parseFloat(valorDoDisplay);
+      const valores = [...this.state.valores];
+      valores[i] = novoValor;
+      this.setState({ valores });
+
+      console.log(valores);
+    }
   }
 
   render() {
@@ -30,7 +82,7 @@ class Calculator extends React.Component {
       <>
         <Title>Calculadora</Title>
         <Container>
-          <Display value="100" />
+          <Display value={this.state.valorDoDisplay} />
           <Button
             label="AC"
             classValue={"triple"}
