@@ -42,7 +42,7 @@ class Calculator extends React.Component {
       } catch (error) {
         valores[0] = this.state.valores[0];
       }
-      
+
       valores[1] = 0;
       this.setState({
         valorDoDisplay: valores[0],
@@ -72,8 +72,6 @@ class Calculator extends React.Component {
       const valores = [...this.state.valores];
       valores[i] = novoValor;
       this.setState({ valores });
-
-      console.log(valores);
     }
   }
 
